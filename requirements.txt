@@ -1,0 +1,14 @@
+# Minimal runtime dependencies for the Mini CRM churn project
+# Pin ranges are intentionally conservative to avoid overly strict locking
+numpy>=1.24,<2.0
+pandas>=2.1,<3.0
+scikit-learn>=1.2,<2.0
+joblib>=1.2,<2.0
+scipy>=1.10,<2.0
+lifetimes>=0.11.3,<0.12.0
+datetime>=2.0,<3.0
+dill>=0.3.4,<0.4.0
+# Optional / helpful for notebooks and plotting
+matplotlib>=3.7,<4.0
+
+# pip install -r requirements.txt to install these dependencies.
