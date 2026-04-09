@@ -20,11 +20,13 @@ class ReturnFeatureBuilder(BaseEstimator, TransformerMixin):
         purchased_qty = purchases.groupby('Customer ID')['Quantity'].sum()
         returned_qty = returns.groupby('Customer ID')['Quantity'].sum().abs()
         return_events = returns.groupby('Customer ID')['InvoiceNo'].nunique()
+        return_value = returns.groupby('Customer ID')['TotalPrice'].sum().abs()
 
         df = pd.DataFrame({
             'purchased_quantity': purchased_qty,
             'returned_quantity': returned_qty,
-            'return_events': return_events
+            'return_events': return_events,
+            'return_value': return_value
         }).fillna(0)
 
         df['return_rate'] = (df['returned_quantity'] / df['purchased_quantity']).clip(0, self.cap_rate)

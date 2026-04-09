@@ -31,9 +31,11 @@ def assign_segments(features_df: pd.DataFrame) -> pd.DataFrame:
     # If you saved dict with metadata (better future-proofing):
     if isinstance(artifact, dict):
         pipeline = artifact["model"]
+        segment_label_map = artifact.get("segment_label_map", {})
         trained_features = artifact.get("features", None)
     else:
         pipeline = artifact
+        segment_label_map = {}
         trained_features = None
 
     # Align feature columns if metadata exists
@@ -50,5 +52,6 @@ def assign_segments(features_df: pd.DataFrame) -> pd.DataFrame:
 
     result = features_df.copy()
     result["segment"] = segments
+    result["segment_label"] = result["segment"].map(segment_label_map).fillna("Unknown")
 
     return result

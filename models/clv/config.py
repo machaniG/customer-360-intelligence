@@ -1,4 +1,5 @@
 from pathlib import Path
+import yaml
 
 # Directories
 
@@ -14,8 +15,25 @@ _global_config_path = GlobalPath(__file__).resolve().parent.parent / "config.py"
 if str(_global_config_path.parent) not in sys.path:
     sys.path.insert(0, str(_global_config_path.parent))
 
-from config import OUTPUTS_PATH
+from config import OUTPUTS_PATH, CONFIG_PATH
 OUTPUT_PATH = OUTPUTS_PATH / "customer_life_value.csv"
+
+# Load CLV config from YAML
+try:
+    with open(CONFIG_PATH, 'r') as f:
+        config = yaml.safe_load(f)
+    CLV_TIER_QUANTILES = config.get('clv', {}).get('tier_quantiles', {
+        "Bronze": 0.50,
+        "Silver": 0.75,
+        "Gold": 0.90,
+    })
+except (FileNotFoundError, yaml.YAMLError):
+    # Fallback to defaults if YAML not found or invalid
+    CLV_TIER_QUANTILES = {
+        "Bronze": 0.50,
+        "Silver": 0.75,
+        "Gold": 0.90,
+    }
 
 # Feature Configuration
 

@@ -10,64 +10,62 @@ logger = logging.getLogger(__name__)
 
 def train_clv_model(customer_features: pd.DataFrame):
     """
-    Train CLV models (BG/NBD and Gamma-Gamma) using pre-calculated lifetimes features.
-
+    Train BG/NBD and Gamma-Gamma models safely.
     Args:
-        customer_features (pd.DataFrame): DataFrame containing customer-level features,
-                                         including 'lifetimes_frequency', 'lifetimes_recency',
-                                         'lifetimes_T', and 'lifetimes_monetary_value'.
-
+        customer_features (pd.DataFrame): DataFrame containing customer-level features, including
+                                         'lifetimes_frequency', 'lifetimes_recency', 'lifetimes_T', 'lifetimes_monetary_value'
     Returns:
-        tuple: A tuple containing the fitted BetaGeoFitter model, GammaGammaFitter model,
-               and the customer_features DataFrame with CLV predictions (or just models).
+        Tuple[BetaGeoFitter, GammaGammaFitter, pd.DataFrame]: Fitted BG/NBD model, fitted Gamma-Gamma model (or None if not fitted), and the cleaned customer_features DataFrame with predictions.
     """
-    # Validate input data
+
     required_cols = GAMMA_FEATURES + BETA_FEATURES
     missing_cols = [col for col in required_cols if col not in customer_features.columns]
     if missing_cols:
         raise ValueError(f"Missing required columns: {missing_cols}")
 
-    # Ensure data types are correct
+    # ✅ Convert types WITHOUT forcing invalid values to 0
     for col in required_cols:
-        customer_features[col] = pd.to_numeric(customer_features[col], errors='coerce').fillna(0)
+        customer_features[col] = pd.to_numeric(customer_features[col], errors='coerce')
 
-    # Initialize models
-    bgf = BetaGeoFitter(penalizer_coef=0.1) # Added a small penalizer_coef as good practice
-    ggf = GammaGammaFitter(penalizer_coef=0.1) # Added a small penalizer_coef as good practice
+    # ─────────────────────────────────────────────────────────────
+    # 1. Fit BG/NBD (more tolerant, but still needs valid values)
+    # ─────────────────────────────────────────────────────────────
+    bgf = BetaGeoFitter(penalizer_coef=0.1)
 
-    # 1. Fit the BetaGeoFitter model
-    try:
-        bgf.fit(
-            customer_features[BETA_FEATURES[0]], # lifetimes_frequency
-            customer_features[BETA_FEATURES[1]], # lifetimes_recency
-            customer_features[BETA_FEATURES[2]]   # lifetimes_T
+    bgf_data = customer_features[
+        (customer_features['lifetimes_frequency'] >= 0) &
+        (customer_features['lifetimes_recency'] >= 0) &
+        (customer_features['lifetimes_T'] > 0)
+    ].dropna(subset=BETA_FEATURES)
+
+    bgf.fit(
+        bgf_data[BETA_FEATURES[0]],
+        bgf_data[BETA_FEATURES[1]],
+        bgf_data[BETA_FEATURES[2]]
+    )
+
+    logger.info(f"BG/NBD fitted on {len(bgf_data)} customers")
+
+    # ─────────────────────────────────────────────────────────────
+    # 2. Fit Gamma-Gamma (STRICT filtering required)
+    # ─────────────────────────────────────────────────────────────
+    ggf = None
+
+    gg_data = customer_features[
+        (customer_features['lifetimes_frequency'] > 0) &
+        (customer_features['lifetimes_monetary_value'] > 0)
+    ].dropna(subset=GAMMA_FEATURES)
+
+    logger.info(f"Gamma-Gamma training customers: {len(gg_data)} / {len(customer_features)}")
+
+    if not gg_data.empty:
+        ggf = GammaGammaFitter(penalizer_coef=0.1)
+        ggf.fit(
+            gg_data[GAMMA_FEATURES[0]],
+            gg_data[GAMMA_FEATURES[1]]
         )
-        logger.info("BG/NBD model fitted successfully")
-    except Exception as e:
-        logger.error(f"Failed to fit BG/NBD model: {e}")
-        raise
-
-    # 2. Filter for customers with repeat purchases for GammaGammaFitter
-    # (lifetimes_frequency > 0 customers are required for Gamma-Gamma)
-    returning_customers_features = customer_features[customer_features['lifetimes_frequency'] > 0]
-
-    # Also filter for positive monetary values (required for Gamma-Gamma)
-    returning_customers_features = returning_customers_features[returning_customers_features['lifetimes_monetary_value'] > 0]
-
-    # If there are no returning customers with positive monetary values, handle this case
-    if returning_customers_features.empty:
-        logger.warning("No returning customers with positive monetary values found. Gamma-Gamma model cannot be fitted.")
-        ggf = None # Or handle as appropriate
+        logger.info("Gamma-Gamma model fitted successfully")
     else:
-        # 3. Fit the GammaGammaFitter model
-        try:
-            ggf.fit(
-                returning_customers_features[GAMMA_FEATURES[0]], # lifetimes_frequency
-                returning_customers_features[GAMMA_FEATURES[1]]  # lifetimes_monetary_value
-            )
-            logger.info("Gamma-Gamma model fitted successfully")
-        except Exception as e:
-            logger.error(f"Failed to fit Gamma-Gamma model: {e}")
-            ggf = None
+        logger.warning("No valid data for Gamma-Gamma. Model not fitted.")
 
-    return bgf, ggf, customer_features # Returning customer_features for potential future use or just the models
+    return bgf, ggf, customer_features

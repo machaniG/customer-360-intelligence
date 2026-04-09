@@ -7,7 +7,7 @@ import pandas as pd
 from config import PROCESSED_PATH, SCORES_PATH
 from etl import load_processed_data
 from features import build_customer_features
-from models.clv.config import BETA_FEATURES, GAMMA_FEATURES, MODEL_PATH, OUTPUT_PATH
+from models.clv.config import BETA_FEATURES, CLV_TIER_QUANTILES, GAMMA_FEATURES, MODEL_PATH, OUTPUT_PATH
 from models.clv import predict_clv
 from lifetimes import BetaGeoFitter, GammaGammaFitter
 
@@ -15,15 +15,44 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def assign_clv_tier(clv_values: pd.Series, tier_quantiles: dict = CLV_TIER_QUANTILES) -> pd.Series:
+    """Assign Bronze/Silver/Gold/Platinum tiers based on 12-month CLV and configurable quantiles."""
+    if clv_values.empty:
+        return pd.Series(dtype="object")
+
+    thresholds = {
+        tier: clv_values.quantile(q)
+        for tier, q in tier_quantiles.items()
+    }
+
+    def tier(value):
+        if pd.isna(value):
+            return pd.NA
+        if value <= thresholds["Bronze"]:
+            return "Bronze"
+        if value <= thresholds["Silver"]:
+            return "Silver"
+        if value <= thresholds["Gold"]:
+            return "Gold"
+        return "Platinum"
+
+    return clv_values.apply(tier)
+
+
 def score_clv(
     transactions_path: str = PROCESSED_PATH,
-    score_date: str = "2010-10-01"
+    score_date: str = "2010-10-01",
+    feature_df: pd.DataFrame = None
 ) -> pd.DataFrame:
     logger.info("Starting CLV prediction...")
 
-    df = load_processed_data()
-
-    feature_df = build_customer_features(df, as_of_date=score_date)
+    if feature_df is None:
+        df = load_processed_data() if transactions_path is None else pd.read_csv(transactions_path, parse_dates=["InvoiceDate"])
+        feature_df = build_customer_features(df, as_of_date=score_date)
+        logger.info("Built customer features for CLV scoring")
+    else:
+        feature_df = feature_df.copy()
+        logger.info("Using provided feature DataFrame for CLV scoring")
 
     clv_cols = ["Customer ID"] + []
     for col in GAMMA_FEATURES + BETA_FEATURES:
@@ -54,6 +83,8 @@ def score_clv(
         bgf_model=bgf_model,
         ggf_model=ggf_model
     ).reset_index()
+
+    clv_predictions_df["clv_tier"] = assign_clv_tier(clv_predictions_df["CLV_12_month"])
 
     # Use only CLV predictions in output to avoid redundant duplicate columns
     output_df = clv_predictions_df.copy()

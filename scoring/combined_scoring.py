@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pandas as pd
 
-from etl import load_processed_data
 from features import build_customer_features
 from models.churn.score_customers import score_customers
 from scoring.score_clv import score_clv
@@ -46,33 +45,48 @@ def run_combined_scoring(
     if output_path is None:
         output_path = str(COMBINED_OUTPUT_PATH)
 
-    # 1) churn
+    # 1) Load transaction data once and build features
+    df = pd.read_csv(transaction_csv_path, parse_dates=["InvoiceDate"])
+    features_df = build_customer_features(df, as_of_date=score_date)
+
+    # Save built features immediately for downstream DB loading
+    features_output_path = Path(output_path).parent / "customer_features.csv"
+    features_output_path.parent.mkdir(parents=True, exist_ok=True)
+    features_df.to_csv(features_output_path, index=False)
+    logger.info(f"Customer features saved to {features_output_path}")
+
+    # 2) churn scoring using shared features
     churn_df = score_customers(
         transactions_path=transaction_csv_path,
         model_path=churn_model_path,
         score_date=score_date,
+        features_df=features_df,
     )
 
-    # 2) clv
-    clv_df = score_clv(score_date=score_date)
+    # 3) clv scoring using shared features
+    clv_df = score_clv(
+        score_date=score_date,
+        feature_df=features_df,
+    )
 
-    # 3) segmentation
-    df = load_processed_data()
-    features_df = build_customer_features(df, as_of_date=score_date)
+    # 4) segmentation
     segment_df = assign_segments(features_df)
 
     # merge outputs
     merged = churn_df.merge(
-        clv_df[['Customer ID', 'CLV_6_month', 'CLV_12_month']],
+        clv_df[['Customer ID', 'CLV_6_month', 'CLV_12_month', 'clv_tier']],
         on='Customer ID',
         how='outer'
     )
 
     merged = merged.merge(
-        segment_df[['Customer ID', 'segment']],
+        segment_df[['Customer ID', 'segment', 'segment_label']],
         on='Customer ID',
         how='outer'
     )
+
+    # Calculate revenue at risk: Expected Value Loss = predicted CLV x churn risk
+    merged['revenue_at_risk'] = merged['CLV_12_month'].fillna(0) * merged['churn_risk'].fillna(0)
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     merged.to_csv(output_path, index=False)

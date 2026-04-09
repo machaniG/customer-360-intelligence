@@ -27,11 +27,19 @@ logger = logging.getLogger(__name__)
 
 # Scoring function
 
-def score_customers(transactions_path, model_path, score_date):
+def score_customers(transactions_path=None, model_path=None, score_date=None, features_df=None):
     logger.info(f"Starting scoring for score_date = {score_date}")
 
-    # Load transactions
-    df = pd.read_csv(transactions_path, parse_dates=["InvoiceDate"])
+    # Load or reuse features
+    if features_df is None:
+        if transactions_path is None:
+            raise ValueError("transactions_path is required when features_df is not provided")
+        df = pd.read_csv(transactions_path, parse_dates=["InvoiceDate"])
+        X = build_customer_features(df, as_of_date=score_date)
+        logger.info("Built customer features for churn scoring")
+    else:
+        X = features_df.copy()
+        logger.info("Using provided feature DataFrame for churn scoring")
 
     # Load model artifact
     artifact = joblib.load(model_path)
@@ -47,9 +55,6 @@ def score_customers(transactions_path, model_path, score_date):
         model = artifact
         feature_cols = FEATURE_COLS
         logger.warning("Legacy model detected (no metadata stored)")
-
-    # uses score_date to build features for scoring
-    X = build_customer_features(df, as_of_date=score_date)
 
     # Validate features
     validate_features(

@@ -3,77 +3,100 @@ import numpy as np
 import warnings
 from lifetimes import BetaGeoFitter, GammaGammaFitter
 from models.clv.config import GAMMA_FEATURES, BETA_FEATURES
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def predict_clv(
     customer_features: pd.DataFrame,
     bgf_model: BetaGeoFitter,
     ggf_model: GammaGammaFitter,
-    prediction_period_6_month: int = 180, # days
-    prediction_period_12_month: int = 365, # days
-    monetary_margin: float = 1.0 # margin for one-time buyer baseline
+    prediction_period_6_month: int = 180,
+    prediction_period_12_month: int = 365,
+    monetary_margin: float = 1.0
 ) -> pd.DataFrame:
     """
-    Predicts Customer Lifetime Value (CLV) for given customer features using fitted BG/NBD and Gamma-Gamma models.
-
+    Predict CLV using fitted BG/NBD and Gamma-Gamma models.      
     Args:
         customer_features (pd.DataFrame): DataFrame containing customer-level features, including
-                                         'lifetimes_frequency', 'lifetimes_recency', 'lifetimes_T',
-                                         and 'lifetimes_monetary_value'.
-        bgf_model (BetaGeoFitter): Fitted BetaGeoFitter model.
-        ggf_model (GammaGammaFitter): Fitted GammaGammaFitter model.
-        prediction_period_6_month (int): Number of days for 6-month CLV prediction.
-        prediction_period_12_month (int): Number of days for 12-month CLV prediction.
-        monetary_margin (float): Multiplier applied to one-time buyer monetary value.
-
-    Returns:
-        pd.DataFrame: customer_features DataFrame with added 'CLV_6_month' and 'CLV_12_month' columns.
+                                         'lifetimes_frequency', 'lifetimes_recency', 'lifetimes_T', 'lifetimes_monetary_value'
+        bgf_model (BetaGeoFitter): Fitted BG/NBD model.
+        ggf_model (GammaGammaFitter): Fitted Gamma-Gamma model.
+        prediction_period_6_month (int): Days to predict for 6-month CLV.
+        prediction_period_12_month (int): Days to predict for 12-month CLV.
+        monetary_margin (float): Margin to apply to one-time buyers' monetary value.
+        Returns:
+            pd.DataFrame: DataFrame with predicted CLV values.
     """
-    # Suppress the non-critical log(0) warnings from lifetimes library
-    with warnings.catch_warnings():
-        warnings.filterwarnings('ignore', message='invalid value encountered in log')
 
-        # 1. Pre-prediction cleaning
-        # ensure frequency, recency, T, and monetary_value are all non-negative and numeric
-        for col in GAMMA_FEATURES + BETA_FEATURES:
-            customer_features[col] = pd.to_numeric(customer_features[col], errors='coerce').fillna(0)
-            customer_features[col] = customer_features[col].clip(lower=0)
+    df = customer_features.copy()
 
-        # 2. Predict Expected Number of Purchases (BG/NBD) first
-        customer_features['predicted_purchases_6_month'] = bgf_model.conditional_expected_number_of_purchases_up_to_time(
-            prediction_period_6_month,
-            customer_features[BETA_FEATURES[0]],
-            customer_features[BETA_FEATURES[1]],
-            customer_features[BETA_FEATURES[2]]
+    # Ensure numeric types (no fillna!)
+    for col in GAMMA_FEATURES + BETA_FEATURES:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+
+    # ─────────────────────────────────────────────────────────────
+    # 1. Predict purchase frequency (BG/NBD)
+    # ─────────────────────────────────────────────────────────────
+    df['predicted_purchases_6_month'] = bgf_model.conditional_expected_number_of_purchases_up_to_time(
+        prediction_period_6_month,
+        df[BETA_FEATURES[0]],
+        df[BETA_FEATURES[1]],
+        df[BETA_FEATURES[2]]
+    )
+
+    df['predicted_purchases_12_month'] = bgf_model.conditional_expected_number_of_purchases_up_to_time(
+        prediction_period_12_month,
+        df[BETA_FEATURES[0]],
+        df[BETA_FEATURES[1]],
+        df[BETA_FEATURES[2]]
+    )
+
+    # ─────────────────────────────────────────────────────────────
+    # 2. Predict monetary value
+    # ─────────────────────────────────────────────────────────────
+    df['predicted_monetary_value'] = np.nan
+
+    # ✅ Returning customers (valid for Gamma-Gamma)
+    mask_gg = (
+        (df['lifetimes_frequency'] > 0) &
+        (df['lifetimes_monetary_value'] > 0)
+    )
+
+    if ggf_model is not None and mask_gg.any():
+        df.loc[mask_gg, 'predicted_monetary_value'] = ggf_model.conditional_expected_average_profit(
+            df.loc[mask_gg, GAMMA_FEATURES[0]],
+            df.loc[mask_gg, GAMMA_FEATURES[1]]
         )
 
-        customer_features['predicted_purchases_12_month'] = bgf_model.conditional_expected_number_of_purchases_up_to_time(
-            prediction_period_12_month,
-            customer_features[BETA_FEATURES[0]],
-            customer_features[BETA_FEATURES[1]],
-            customer_features[BETA_FEATURES[2]]
-        )
+    # ✅ One-time buyers
+    mask_one_time = (
+        (df['lifetimes_frequency'] == 0) &
+        (df['lifetimes_monetary_value'] > 0)
+    )
 
-        # 3. Predict Expected Monetary Value (Gamma-Gamma) and handle one-time buyers
-        customer_features['predicted_monetary_value'] = 0.0
+    df.loc[mask_one_time, 'predicted_monetary_value'] = (
+        df.loc[mask_one_time, 'lifetimes_monetary_value'] * monetary_margin
+    )
 
-        # returning customers (have repeat purchases) can use Gamma-Gamma prediction if model exists
-        mask_returning = customer_features['lifetimes_frequency'] > 0
-        mask_returning_ok = mask_returning & (customer_features['lifetimes_monetary_value'] > 0)
+    # ✅ Fallback for invalid customers (VERY IMPORTANT)
+    mask_invalid = df['predicted_monetary_value'].isna()
 
-        if ggf_model is not None and not customer_features[mask_returning_ok].empty:
-            customer_features.loc[mask_returning_ok, 'predicted_monetary_value'] = ggf_model.conditional_expected_average_profit(
-                customer_features.loc[mask_returning_ok, GAMMA_FEATURES[0]],
-                customer_features.loc[mask_returning_ok, GAMMA_FEATURES[1]]
-            )
+    df.loc[mask_invalid, 'predicted_monetary_value'] = (
+        df.loc[mask_invalid, 'lifetimes_monetary_value']
+    )
 
-        # one-time buyers: use current observed monetary_value as baseline and optional margin
-        mask_one_time = (customer_features['lifetimes_frequency'] == 0) & (customer_features['lifetimes_monetary_value'] > 0)
-        customer_features.loc[mask_one_time, 'predicted_monetary_value'] = (
-            customer_features.loc[mask_one_time, 'lifetimes_monetary_value'] * monetary_margin
-        )
+    # ─────────────────────────────────────────────────────────────
+    # 3. Final CLV calculation
+    # ─────────────────────────────────────────────────────────────
+    df['CLV_6_month'] = df['predicted_purchases_6_month'] * df['predicted_monetary_value']
+    df['CLV_12_month'] = df['predicted_purchases_12_month'] * df['predicted_monetary_value']
 
-        # 4. Calculate Final CLVs
-        customer_features['CLV_6_month'] = customer_features['predicted_purchases_6_month'] * customer_features['predicted_monetary_value']
-        customer_features['CLV_12_month'] = customer_features['predicted_purchases_12_month'] * customer_features['predicted_monetary_value']
+    # ─────────────────────────────────────────────────────────────
+    # 4. Diagnostics (keep this for now)
+    # ─────────────────────────────────────────────────────────────
+    logger.info(f"CLV negative count: {(df['CLV_12_month'] < 0).sum()}")
+    logger.info(f"CLV zero count: {(df['CLV_12_month'] == 0).sum()}")
 
-    return customer_features
+    return df
