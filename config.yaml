@@ -1,0 +1,8 @@
+# CLV Tier Configuration
+# Quantiles for assigning CLV tiers based on 12-month CLV predictions
+# Bronze: bottom 50%, Silver: 50-75%, Gold: 75-90%, Platinum: top 10%
+clv:
+  tier_quantiles:
+    Bronze: 0.50
+    Silver: 0.75
+    Gold: 0.90
