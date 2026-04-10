@@ -104,3 +104,5 @@ if __name__ == "__main__":
 # 3. It merges these three datasets on the "Customer ID" column to create a comprehensive dataset that includes churn risk, CLV predictions, and segment assignments for each customer.
 # 4. Finally, it saves the merged dataset to a CSV file at the specified output path. To run the script, execute `python scoring/combined_scoring.py` from the command line, or `
 # python -m scoring.combined_scoring ` if you are in the root directory of the project.
+# run script with date argument to score for a specific date (defaults to churn model default date if not provided):
+# python -m scoring.combined_scoring --score_date 2010-10-31    
