@@ -117,7 +117,7 @@ def score_customers_endpoint(score_date: str = None):
     from scoring.combined_scoring import run_combined_scoring
 
     try:
-        features_df, scores_df = run_combined_scoring(
+        scores_df, features_df = run_combined_scoring(
             transaction_csv_path=transactions_path,
             score_date=score_date
         )
