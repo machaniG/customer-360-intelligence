@@ -67,3 +67,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+""" This script serves as an orchestrator for the entire Mini CRM pipeline. It sequentially executes the ETL process, trains the churn, CLV, and segmentation models, and finally runs the monthly scoring script. Each step is logged for monitoring and debugging purposes. If any step fails, the pipeline will stop and log the error details. To run the full pipeline, 
+# execute `python scripts/full_pipeline.py` from the command line. Make sure to have all the necessary dependencies installed and configured before running the pipeline.
+or from the root directory of the project, you can also run it as a module:
+`python -m scripts.full_pipeline`  
+for retraining models with new date, run the full pipeline by updating as_of_date in the config or by passing it as an argument to the individual training and scoring scripts.
+ python -m scripts.full_pipeline --as_of_date 2010-10-31
+"""

@@ -50,6 +50,7 @@ def run_etl():
     df = df[df['InvoiceDate'] <= pd.to_datetime(CUTOFF_DATE)]
     logger.info(f"Truncated data to {CUTOFF_DATE}. Rows reduced from {original_count} to {len(df)}.")
 
+
     # 3. Apply transformations
     df = add_transaction_type(df)
     df = add_total_price(df)
@@ -77,4 +78,4 @@ if __name__ == "__main__":
 # 5. Identifies and removes one-time-off customers who only have one purchase.
 # 6. Saves the processed dataset to a specified path.
 # run it with `python scripts/run_etl.py` from the command line. or `python -m scripts.run_etl` if you are in the root directory of the project.
-# or provide output file name as an argument `python scripts/run_etl.py --output processed_data.csv` to specify a custom output file name.
+# or provide output file name as an argument `python -m scripts.run_etl --output processed_data.csv` to specify a custom output file name.

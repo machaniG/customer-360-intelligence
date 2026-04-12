@@ -3,14 +3,19 @@ from pathlib import Path
 
 # Define paths
 BASE_DIR = Path(__file__).resolve().parent
+MODEL_DIR = Path(os.getenv("MODEL_DIR", BASE_DIR / "artifacts/models"))
+OUTPUTS_PATH = Path(os.getenv("OUTPUTS_PATH", BASE_DIR / "outputs"))
+
+MODEL_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUTS_PATH.mkdir(parents=True, exist_ok=True)
+
 RAW_PATH = BASE_DIR / "data/raw/cleaned_transactions.csv"      # Input dataset
 PROCESSED_PATH = BASE_DIR / "data/processed/transactions.csv" # Output processed dataset
 FEATURE_PATH = BASE_DIR / "data/features/customer_features.csv" # Output features dataset
 MODELS_PATH = BASE_DIR / "models" # Directory to save trained models
-OUTPUTS_PATH = BASE_DIR / "outputs"
-OUTPUTS_PATH.mkdir(parents=True, exist_ok=True)
 
-# NOTE: legacy scores folder left for compatibility, but outputs is authoritative
+
+#legacy scores folder left for compatibility, but outputs is authoritative
 SCORES_PATH = OUTPUTS_PATH
 CONFIG_PATH = BASE_DIR / "config.yaml"
 
@@ -28,15 +33,3 @@ FEATURE_COLS = [
     "std_days_between",
     "purchase_rate_monthly",
 ]
-
-import os
-from pathlib import Path
-
-# Define paths
-BASE_DIR = Path(__file__).resolve().parent
-RAW_PATH = BASE_DIR / "data/raw/cleaned_transactions.csv"      # Input dataset
-PROCESSED_PATH = BASE_DIR / "data/processed/transactions.csv" # Output processed dataset
-FEATURE_PATH = BASE_DIR / "data/features/customer_features.csv" # Output features dataset
-MODELS_PATH = BASE_DIR / "models" # Directory to save trained models
-SCORES_PATH = BASE_DIR / "scores" # Directory to save customer scores
-CONFIG_PATH = BASE_DIR / "config.yaml"

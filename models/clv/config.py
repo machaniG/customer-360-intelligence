@@ -1,9 +1,9 @@
 from pathlib import Path
 import yaml
-
+import os
 # Directories
 
-BASE_DIR = Path("artifacts")
+BASE_DIR = Path(os.getenv("BASE_DIR", "artifacts"))
 
 MODEL_DIR = BASE_DIR / "models" / "clv"
 MODEL_PATH = MODEL_DIR / "clv_model.pkl"
@@ -16,7 +16,7 @@ if str(_global_config_path.parent) not in sys.path:
     sys.path.insert(0, str(_global_config_path.parent))
 
 from config import OUTPUTS_PATH, CONFIG_PATH
-OUTPUT_PATH = OUTPUTS_PATH / "customer_life_value.csv"
+OUTPUT_PATH = Path(os.getenv("OUTPUTS_PATH", "outputs")) / "customer_life_value.csv"
 
 # Load CLV config from YAML
 try:

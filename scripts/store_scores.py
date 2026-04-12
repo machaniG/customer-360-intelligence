@@ -182,5 +182,5 @@ python store_scores.py\
 python -m scripts.store_scores \
     --scores_path outputs/combined_customer_scores.csv \
     --features_path outputs/customer_features.csv \
-    --as_of_date 2011-10-31
+    --as_of_date 2010-10-31
  """

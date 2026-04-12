@@ -12,8 +12,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-
-from agents.agent import build_agent  
+import os
 from dotenv import load_dotenv; load_dotenv()
 
 load_dotenv(Path(__file__).parent / ".env")
@@ -30,7 +29,8 @@ logging.basicConfig(
     ],
 )
 # Show our own agent logs in the file but not the console
-logging.getLogger("agent").setLevel(logging.INFO)
+logger = logging.getLogger("agent")
+logger.setLevel(logging.INFO)
 logging.getLogger("db").setLevel(logging.INFO)
 
 from agents.agent import build_agent
@@ -97,8 +97,7 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--verbose",
-        default="true",
-        choices=["true", "false"],
+        action="store_true",
         help="Show the agent's reasoning chain. Default: true.",
     )
     return parser.parse_args()
@@ -106,7 +105,7 @@ def _parse_args() -> argparse.Namespace:
 
 if __name__ == "__main__":
     args = _parse_args()
-    verbose = args.verbose.lower() == "true"
+    verbose = args.verbose
 
     if args.question:
         # Single-shot mode

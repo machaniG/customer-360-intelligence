@@ -23,8 +23,8 @@ def get_priority_customers(top_n: int = 10, risk_band: Optional[str] = None, min
     """
     Fetch top customers ranked by revenue at risk.
     risk_band options: 
-      - 'high': churn_risk > 0.5
-      - 'medium': churn_risk between 0.3 and 0.5
+      - 'high': churn_risk > 0.4
+      - 'medium': churn_risk between 0.3 and 0.4
       - 'low': churn_risk < 0.3
     """
     logger.info("Tool: get_priority_customers(top_n=%d, risk_band=%s, min_clv=%s)", top_n, risk_band, min_clv)
@@ -33,7 +33,7 @@ def get_priority_customers(top_n: int = 10, risk_band: Optional[str] = None, min
 
 @tool
 def get_revenue_at_risk(top_n: int = 10) -> str:
-    """Fetch high-value customers with churn_risk > 0.5, ordered by CLV_12_month."""
+    """Fetch high-value customers with churn_risk > 0.4, ordered by CLV_12_month."""
     logger.info("Tool: get_revenue_at_risk(top_n=%d)", top_n)
     df = fetch_revenue_at_risk(top_n=top_n)
     return _df_to_json(df)

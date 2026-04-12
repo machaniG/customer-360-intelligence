@@ -40,9 +40,9 @@ def fetch_priority_customers(
         
         # risk_band logic mapped to 'churn_risk'
         if risk_band == 'high':
-            query += " AND s.churn_risk > 0.5"
+            query += " AND s.churn_risk > 0.4"
         elif risk_band == 'medium':
-            query += " AND s.churn_risk BETWEEN 0.3 AND 0.5"
+            query += " AND s.churn_risk BETWEEN 0.3 AND 0.4"
         elif risk_band == 'low':
             query += " AND s.churn_risk < 0.3"
             
@@ -55,14 +55,14 @@ def fetch_priority_customers(
         return pd.read_sql(text(query), conn, params=params)
 
 def fetch_revenue_at_risk(top_n: int = 10) -> pd.DataFrame:
-    """Fetch high-value customers with churn_risk > 0.5."""
+    """Fetch high-value customers with churn_risk > 0.4."""
     engine = get_engine()
     with engine.connect() as conn:
         aod = _latest_as_of_date(conn)
         query = f"""
             SELECT customer_id, churn_risk, clv_12_month, revenue_at_risk, segment_label
             FROM {SCORES_TABLE}
-            WHERE as_of_date = :aod AND churn_risk > 0.5
+            WHERE as_of_date = :aod AND churn_risk > 0.4
             ORDER BY revenue_at_risk DESC LIMIT :limit
         """
         return pd.read_sql(text(query), conn, params={"aod": aod, "limit": top_n})

@@ -73,26 +73,26 @@ def run_combined_scoring(
     segment_df = assign_segments(features_df)
 
     # merge outputs
-    merged = churn_df.merge(
+    merged_scores = churn_df.merge(
         clv_df[['Customer ID', 'CLV_6_month', 'CLV_12_month', 'clv_tier']],
         on='Customer ID',
         how='outer'
     )
 
-    merged = merged.merge(
+    merged_scores = merged_scores.merge(
         segment_df[['Customer ID', 'segment', 'segment_label']],
         on='Customer ID',
         how='outer'
     )
 
     # Calculate revenue at risk: Expected Value Loss = predicted CLV x churn risk
-    merged['revenue_at_risk'] = merged['CLV_12_month'].fillna(0) * merged['churn_risk'].fillna(0)
+    merged_scores['revenue_at_risk'] = merged_scores['CLV_12_month'].fillna(0) * merged_scores['churn_risk'].fillna(0)
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    merged.to_csv(output_path, index=False)
+    merged_scores.to_csv(output_path, index=False)
     logger.info(f"Combined scoring output file saved to {output_path}")
 
-    return merged
+    return merged_scores, features_df
 
 
 if __name__ == "__main__":

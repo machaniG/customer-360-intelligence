@@ -1,8 +1,9 @@
 from pathlib import Path
+import os
 
 # Directories
 
-MODEL_DIR = Path("artifacts/models")
+MODEL_DIR = Path(os.getenv("MODEL_DIR", "artifacts/models"))
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL_PATH = MODEL_DIR / "segmentation_model.pkl"
@@ -10,7 +11,7 @@ MODEL_PATH = MODEL_DIR / "segmentation_model.pkl"
 from config import OUTPUTS_PATH
 
 # Output path
-OUTPUT_PATH = OUTPUTS_PATH / "customer_value_segments.csv"
+OUTPUT_PATH = Path(os.getenv("OUTPUTS_PATH", "outputs")) / "customer_segments.csv"
 
 # Segment labels ordered from BEST to WORST.
 # After clustering, centroids are ranked by a composite RFM score
