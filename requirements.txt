@@ -1,6 +1,6 @@
 numpy>=1.24,<2.0
 pandas>=2.1,<3.0
-scikit-learn>=1.2,<2.0
+scikit-learn==1.2.2
 joblib>=1.2,<2.0
 scipy>=1.10,<2.0
 lifetimes>=0.11.3,<0.12.0
@@ -16,11 +16,15 @@ langchain-community
 langchain-ollama
 
 # Optional / helpful for notebooks and plotting
-matplotlib>=3.7,<4.0
+#matplotlib>=3.7,<4.0
 
 #db
 sqlalchemy 
 psycopg2-binary 
 python-dotenv
 
+# app
+#fastapi
+#uvicorn
+#streamlit
 # pip install -r requirements.txt

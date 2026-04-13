@@ -1,6 +1,4 @@
 # AI-powered Decision System for Revenue Prioritization
-AI-powered decision system that identifies high-value at-risk customers and recommends revenue-maximizing actions using ML + LLMs.
-
 
 An end-to-end customer intelligence system that transforms raw transactional data into **actionable revenue decisions**.
 
@@ -71,44 +69,44 @@ And receive:
 
 ```plaintext
 🤖 Agent:
+**Customer ID: 12678.0**
+- **Churn Risk:** 44.8%
+- **Predicted CLV (12m):** £185,193.69
+- **Revenue at Risk:** £82,973.51
+- **Segment:** At Risk
+- **Behavioral Context:** Last purchase was 28 days ago with a monthly purchase rate of 0.8.
+- **Recommended Action:** Immediate re-engagement discount or "we miss you" personalized email.
+
+**Customer ID: 14062.0**
+- **Churn Risk:** 47.2%
+- **Predicted CLV (12m):** £161,930.68
+- **Revenue at Risk:** £76,364.24
+- **Segment:** At Risk
+- **Behavioral Context:** Last purchase was 34 days ago with a monthly purchase rate of 0.72.
+- **Recommended Action:** Immediate re-engagement discount or "we miss you" personalized email.
+
 **Customer ID: 13680.0**
-- **Churn Risk:** 51.65%
+- **Churn Risk:** 51.6%
 - **Predicted CLV (12m):** £129,844.68
 - **Revenue at Risk:** £67,055.26
 - **Segment:** At Risk
 - **Behavioral Context:** Last purchase was 36 days ago with a monthly purchase rate of 0.81.
-- **Recommended Action:** Personalized re-engagement offer.
-
-**Customer ID: 16984.0**
-- **Churn Risk:** 56.67%
-- **Predicted CLV (12m):** £76,537.41
-- **Revenue at Risk:** £43,373.23
-- **Segment:** At Risk
-- **Behavioral Context:** Last purchase was 43 days ago with a monthly purchase rate of 0.88.
 - **Recommended Action:** Immediate re-engagement discount or "we miss you" personalized email.
 
-**Customer ID: 15622.0**
-- **Churn Risk:** 54.26%
-- **Predicted CLV (12m):** £69,325.85
-- **Revenue at Risk:** £37,615.32
-- **Segment:** At Risk
-- **Behavioral Context:** Last purchase was 115 days ago with a monthly purchase rate of 1.01.
-- **Recommended Action:** Immediate re-engagement discount or "we miss you" personalized email.
-
-**Customer ID: 14505.0**
-- **Churn Risk:** 50.81%
-- **Predicted CLV (12m):** £71,926.38
-- **Revenue at Risk:** £36,545.35
-- **Segment:** At Risk
-- **Behavioral Context:** Last purchase was 43 days ago with a monthly purchase rate of 1.03.
-- **Recommended Action:** Immediate re-engagement discount or "we miss you" personalized email.
-
-**Customer ID: 15179.0**
-- **Churn Risk:** 55.78%
-- **Predicted CLV (12m):** £58,369.90
-- **Revenue at Risk:** £32,558.14
+**Customer ID: 15369.0**
+- **Churn Risk:** 44.5%
+- **Predicted CLV (12m):** £109,536.42
+- **Revenue at Risk:** £48,766.11
 - **Segment:** Lost
-- **Behavioral Context:** Last purchase was 91 days ago with a monthly purchase rate of 0.61.
+- **Behavioral Context:** Last purchase was 57 days ago with a monthly purchase rate of 1.13.
+- **Recommended Action:** Aggressive win-back offer or feedback survey to understand why they stopped buying.
+
+**Customer ID: 13324.0**
+- **Churn Risk:** 41.9%
+- **Predicted CLV (12m):** £109,157.31
+- **Revenue at Risk:** £45,801.18
+- **Segment:** Lost
+- **Behavioral Context:** Last purchase was 16 days ago with a monthly purchase rate of 1.66.
 - **Recommended Action:** Aggressive win-back offer or feedback survey to understand why they stopped buying.
 ```
 
