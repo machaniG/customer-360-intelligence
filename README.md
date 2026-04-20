@@ -244,7 +244,9 @@ OPENAI_API_KEY=sk-...
 This system does not stop at **dashboards and model outputs**, it goes further and:
 
 ✅ identifies who to act on
+
 ✅ quantifies business impact
+
 ✅ suggests what to do next
 
 As a result, bridging the gap between data science and decision-making.
@@ -252,12 +254,6 @@ As a result, bridging the gap between data science and decision-making.
 ---
 
 ## Tech Stack
-
-- **Python** (Pandas, Scikit-learn, Lifetimes)
-- **PostgreSQL** (centralized data storage)
-- **LangChain** (agent orchestration and tool-based querying over structured data)
-- **LLM APIs** (OpenAI, Anthropic, Ollama)
-- Feature engineering pipeline (modular design)
 
 - **Python** (Pandas, Scikit-learn, Lifetimes)
 - **FastAPI** (serving ML pipeline and agent endpoints)
