@@ -2,12 +2,11 @@
 
 ## Problem
 
-Businesses often build machine learning models like churn prediction or customer lifetime value (CLV), but these outputs rarely translate into clear business actions.
+Businesses generate churn scores and CLV predictions but struggle to:
 
-Teams are left asking:
-- Which customers should we prioritize?
-- What is the financial impact of losing them?
-- What action should we take?
+- prioritize customers effectively
+- quantify revenue impact
+- translate insights into actions
 
 The gap: **predictions → decisions**
 
@@ -15,14 +14,11 @@ The gap: **predictions → decisions**
 
 ## Solution
 
-I built an end-to-end decision system that combines multiple ML models into a unified business-facing layer.
+I built a **decision intelligence** system that:
 
-The system:
-
-- predicts churn probability  
-- estimates customer lifetime value  
-- segments customers by behavior  
-- calculates **revenue at risk (Churn × CLV)**  
+- combines churn + CLV + segmentation
+- computes **Revenue at Risk (RaR)**
+- exposes insights via API and AI interface
 
 This enables **value-based prioritization of customers**
 
@@ -40,7 +36,7 @@ This enables **value-based prioritization of customers**
 ### 2. Predictive Models
 
 - **Churn Model** → classification  
-- **CLV Model** → regression  
+- **CLV Model** → Gamma-Gamma and BG/NBD models  
 - **Segmentation** → clustering (K-Means)  
 
 Each model serves a specific role in decision-making.
@@ -54,7 +50,6 @@ Combined outputs into:
 
 This creates a **single prioritization metric** aligned with business goals.
 
----
 
 ### 4. AI Interface (LLM Agent)
 
@@ -69,35 +64,50 @@ Output includes:
 - behavioral insights  
 - recommended actions  
 
+
+### 5. FastAPI & Streamlit UI
+
+Built FastAPI service for scoring + querying and developed Streamlit app for business users. 
+
 ---
 
-## Results / Impact
+## Results 
 
 - Identifies high-value customers at risk of churn  
 - Prioritizes actions based on financial impact  
-- Reduces reliance on manual analysis  
-- Makes ML outputs accessible to non-technical stakeholders  
+- Makes ML outputs accessible to non-technical stakeholders 
 
-Shifts focus from **model accuracy → business value**
+Enabled:
+   - targeted retention strategies
+   - revenue-based prioritization
+   - faster decision-making 
+
+---
+
+## Impact
+
+- Shifts focus from **model accuracy → business value**
+- Shift from **descriptive analytics → decision intelligence**
+- Reduces reliance on manual analysis
+- Provides **clear, actionable recommendations**
 
 ---
 
 ## Key Highlights
 
-- End-to-end ML system (not just a model)
-- Modular feature pipeline (production mindset)
-- Business-driven metric (Revenue at Risk)
-- LLM integration for decision support
-- Strong alignment with real-world use cases
+- Slightly imperfect models inside a strong decision system delivers more value than a perfect model in isolation.
 
 ---
 
 ## Tech Stack
 
-- Python (Pandas, Scikit-learn)
-- PostgreSQL (centralized data storage)
-- LangChain (agent orchestration and tool-based querying over structured data)
-- LLM APIs (OpenAI / Anthropic / local models)
+- **Python** (Pandas, Scikit-learn, Lifetimes)
+- **FastAPI** (serving ML pipeline and agent endpoints)
+- **PostgreSQL** (customer feature & scoring store)
+- **Streamlit** (interactive decision dashboard)
+- **LangChain** (LLM agent orchestration and tool-based querying over structured data)
+- **LLM Providers** (OpenAI, Anthropic, Ollama)
+- **Docker** (containerization-ready architecture)
 
 ---
 
@@ -117,7 +127,7 @@ This violates model assumptions and leads to some **unrealistic or negative CLV 
 
 ### Design Approach
 
-Rather than over-optimizing the CLV model, the focus was on building a **robust decision system**:
+Rather than over-optimizing the CLV model, the focus was on building a **robust decision system** and the CLV prediction can be switched to a better model:
 
 - Combining multiple models into a unified decision layer  
 - Prioritizing customers using **revenue at risk (Churn × CLV)**  
@@ -131,13 +141,6 @@ Rather than over-optimizing the CLV model, the focus was on building a **robust 
 - Prioritization remains meaningful at the top end (where business impact matters most)  
 
 
-### Key Takeaway
-
-In real-world systems:
-
-**Imperfect models within a strong decision framework often deliver more value than perfectly optimized standalone models**
-
-
 ### Extensibility
 
 The system is designed to evolve:
@@ -149,12 +152,11 @@ Examples:
 - Replace Gamma-Gamma with ML-based or survival models  
 - Upgrade Random Forest → Gradient Boosting (XGBoost, LightGBM)  
 
-This reflects a **production-oriented, modular design mindset**
-
-...
+---
 
 ## Future Work
 
-- Real-time scoring pipeline  
+- RAGs for stock code and product description
 - A/B testing for retention strategies  
-- Integration with CRM systems  
+- Integration with CRM systems 
+- Real-time scoring pipeline  
