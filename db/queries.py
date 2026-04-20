@@ -99,3 +99,24 @@ def fetch_segment_summary() -> pd.DataFrame:
             ORDER BY avg_clv_12m DESC
         """
         return pd.read_sql(text(query), conn, params={"aod": aod})
+    
+# fetch total revenue at risk for KPI card
+def fetch_revenue_summary() -> dict:
+    """Aggregate stats for all customers with churn_risk > 0.4."""
+    engine = get_engine()
+    with engine.connect() as conn:
+        aod = _latest_as_of_date(conn)
+        query = f"""
+            SELECT 
+                COUNT(*) FILTER (WHERE revenue_at_risk > 0 AND churn_risk > 0.4) as total_customers,
+                SUM(revenue_at_risk) FILTER (WHERE revenue_at_risk > 0) as total_revenue_at_risk,
+                AVG(clv_12_month) FILTER (WHERE clv_12_month > 0) as avg_clv
+            FROM {SCORES_TABLE}
+            WHERE as_of_date = :aod AND churn_risk > 0.4
+        """
+        row = conn.execute(text(query), {"aod": aod}).fetchone()
+        return {
+            "total_customers": int(row.total_customers),
+            "total_revenue_at_risk": float(row.total_revenue_at_risk or 0),
+            "avg_clv": float(row.avg_clv or 0)
+        }

@@ -25,6 +25,7 @@ python-dotenv
 
 # app
 #fastapi
+#requests
 #uvicorn
 #streamlit
 # pip install -r requirements.txt

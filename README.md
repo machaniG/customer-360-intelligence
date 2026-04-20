@@ -1,10 +1,12 @@
 # AI-powered Decision System for Revenue Prioritization
 
-An end-to-end customer intelligence system that transforms raw transactional data into **actionable revenue decisions**.
+An end-to-end decision intelligence system that helps businesses **prioritize customers based on revenue impact**.
 
-Instead of dashboards or isolated model outputs, this system answers a critical business question:
+Instead of dashboards or isolated model outputs, this system answers a critical question:
 
-- *“Which customers should we act on right now to maximize revenue impact?”*
+ - *“Which customers should we act on right now to maximize revenue?”*
+
+It combines machine learning, a centralized data layer, and an AI interface to turn raw data into **clear, actionable decisions**.
 
 ---
 
@@ -19,6 +21,19 @@ This project bridges that gap by combining:
 - A natural language AI interface (LLM agent)
 
 **The result:** a system that turns data into **clear, prioritized actions for revenue teams**
+
+---
+
+## Live Demo
+
+Watch the system in action:
+
+[▶️ Demo Video](https://www.loom.com/share/b88a7162a7d149e6946e60b30c0bf962)
+
+The demo showcases:
+- Revenue risk dashboard
+- Customer-level insights
+- AI-powered decision recommendations
 
 ---
 
@@ -114,6 +129,44 @@ This poject moves from data analysis → decision support
 
 ---
 
+## Model Performance
+
+### Churn Prediction Model
+
+The churn model was evaluated on 2,675 customers with the following performance:
+
+- **ROC AUC**: 0.793
+- **PR AUC**: 0.808
+- **Brier Score**: 0.1865
+
+**Business-Oriented Evaluation**
+
+Instead of focusing only on metrics, the model was evaluated for **decision usefulness**:
+
+- **Top 10% customers**
+   - Precision: **88.8%**
+   - Lift: **1.58×**
+   - Captures **16% of all churners**
+
+- **Top 20% customers**
+   - Precision: **85.0%**
+   - Lift: **1.51×**
+   - Captures **30% of all churners**
+
+- **Top 5% customers**
+   - Precision: **93.2%**
+   - Lift: **1.65×**
+
+**Interpretation**
+
+The model is not only predictive but actionable:
+
+- High precision in top segments ensures **efficient targeting**
+- Lift demonstrates **strong prioritization capability**
+- Enables focusing on a small subset of customers with **disproportionate impact**
+
+---
+
 ## System Architecture
 ```plaintext
 Raw Transaction Data
@@ -131,6 +184,24 @@ LLM Agent (Natural Language Interface)
         ↓
 Actionable Business Insights
 ```
+---
+
+## Application Layer
+
+The system is exposed through:
+
+### FastAPI Backend
+- Scoring endpoint for monthly model updates
+- Query endpoints for customer insights
+- Agent endpoint for natural language interaction
+
+### Streamlit UI
+- Revenue-at-risk dashboard
+- Customer explorer
+- AI-powered decision interface
+
+This transforms the system from a modeling pipeline into a **usable business application**
+
 ---
 
 ## ⚙️ Configurable LLM Layer
@@ -187,6 +258,14 @@ As a result, bridging the gap between data science and decision-making.
 - **LangChain** (agent orchestration and tool-based querying over structured data)
 - **LLM APIs** (OpenAI, Anthropic, Ollama)
 - Feature engineering pipeline (modular design)
+
+- **Python** (Pandas, Scikit-learn, Lifetimes)
+- **FastAPI** (serving ML pipeline and agent endpoints)
+- **PostgreSQL** (customer feature & scoring store)
+- **Streamlit** (interactive decision dashboard)
+- **LangChain** (LLM agent orchestration and tool-based querying over structured data)
+- **LLM Providers** (OpenAI, Anthropic, Ollama)
+- **Docker** (containerization-ready architecture)
 
 ---
 

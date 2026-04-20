@@ -1,5 +1,8 @@
 # app/main.py (FastAPI)
 
+from http.client import HTTPException
+from unittest import result
+
 from fastapi import FastAPI
 from app.database import db_connection
 import logging
@@ -40,10 +43,10 @@ def top_customers(risk_band: str = None, min_clv: float = None):
 
 
 
-# REVENUE AT RISK
+# REVENUE AT RISK (Top N)
 
-@app.get("/revenue-at-risk")
-def revenue_at_risk(top_n: int = 10):
+@app.get("/revenue-at-risk/topN")
+def revenue_at_risk_top_10_customers(top_n: int = 10):
     logger.info(f"Fetching top {top_n} customers by revenue at risk")
 
     from db.queries import fetch_revenue_at_risk
@@ -59,6 +62,15 @@ def revenue_at_risk(top_n: int = 10):
         "data": df.to_dict(orient="records")
     }
 
+# REVENUE AT RISK (All)
+@app.get("/revenue-at-risk/summary")
+def total_revenue_at_risk():
+    logger.info(f"Fetching all customers with revenue at risk")
+
+    from db.queries import fetch_revenue_summary
+    summary = fetch_revenue_summary()
+
+    return {"status": "ok", "data": summary}
 
 
 # CUSTOMER PROFILE
