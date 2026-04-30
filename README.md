@@ -107,22 +107,7 @@ And receive:
 - **Segment:** At Risk
 - **Behavioral Context:** Last purchase was 36 days ago with a monthly purchase rate of 0.81.
 - **Recommended Action:** Immediate re-engagement discount or "we miss you" personalized email.
-
-**Customer ID: 15369.0**
-- **Churn Risk:** 44.5%
-- **Predicted CLV (12m):** £109,536.42
-- **Revenue at Risk:** £48,766.11
-- **Segment:** Lost
-- **Behavioral Context:** Last purchase was 57 days ago with a monthly purchase rate of 1.13.
-- **Recommended Action:** Aggressive win-back offer or feedback survey to understand why they stopped buying.
-
-**Customer ID: 13324.0**
-- **Churn Risk:** 41.9%
-- **Predicted CLV (12m):** £109,157.31
-- **Revenue at Risk:** £45,801.18
-- **Segment:** Lost
-- **Behavioral Context:** Last purchase was 16 days ago with a monthly purchase rate of 1.66.
-- **Recommended Action:** Aggressive win-back offer or feedback survey to understand why they stopped buying.
+...
 ```
 
 This poject moves from data analysis → decision support
@@ -195,6 +180,9 @@ The system is exposed through:
 - Query endpoints for customer insights
 - Agent endpoint for natural language interaction
 
+![Combined scores successfully written to PostgreSQL database](artifacts/assets/scores-in-db.png)
+
+
 ### Streamlit UI
 - Revenue-at-risk dashboard
 - Customer explorer
@@ -206,9 +194,9 @@ This transforms the system from a modeling pipeline into a **usable business app
 
 ## ⚙️ Configurable LLM Layer
 
-The system is model-agnostic and supports multiple providers for flexibility, cost control, and future-proofing:
+The system is model-agnostic and supports multiple providers for flexibility, cost control, and future-proofing.
 
-### Supported Options
+**Supported Options**
 
 - **Local Models** (Ollama / LLaMA) → privacy + zero cost
 - **OpenAI (GPT-4o)** → high performance
