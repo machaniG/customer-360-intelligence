@@ -1,346 +1,84 @@
-# AI-powered Decision System for Revenue Prioritization
+# Customer Retention Decision System
 
-An end-to-end decision intelligence system that helps businesses **prioritize customers based on revenue impact**.
-
-Instead of dashboards or isolated model outputs, this system answers a critical question:
-
- - *“Which customers should we act on right now to maximize revenue?”*
-
-It combines machine learning, a centralized data layer, and an AI interface to turn raw data into **clear, actionable decisions**.
-
----
+Focus retention efforts on the customers most likely to leave and cost you money.
 
 ## Overview
 
-Most businesses generate churn scores, CLV predictions, and segmentation outputs — but struggle to **translate them into action**.
+This is a customer retention system that **bridges the gap between CRM analytics and action by turning customer data into clear, prioritized retention decisions**. It can help businesses prevent revenue loss by identifying which customers are most valuable and most likely to leave. The system ranks customers based on expected value loss (revenue at risk) and highlights who to contact first and what to offer them to maximize impact. 
 
-This project bridges that gap by combining:
+- **Targeting the top 20% of customers ranked by revenue-at-risk (using this system) captures ~52% of total revenue loss in the following three months, significantly outperforming churn-only (14%) and value-only (43%) approaches.**
 
-- Predictive modeling (churn, CLV, segmentation)
-- Centralized data infrastructure (PostgreSQL)
-- A natural language AI interface (LLM agent)
+- The system works directly from raw transaction data, automatically transforming it into customer-level insights, removing the need for manual data preparation. 
+- It highlights who to contact first and why (high-priority customers and key insights about their behavior)
+- Suggests targeted retention actions (e.g., personalized offers based on past purchases). 
+- Results are delivered through a simple user interface chatbot and scheduled reports, making it easy for teams to act quickly without manual analysis.
+- It is designed to stay up to date as new data arrives, allowing teams to easily refresh customer scores and keep retention efforts aligned with the latest behavior.
+- Designed as a modular system that can adapt to different data environments, allowing performance to scale with the quality and richness of available customer data.
 
-**The result:** a system that turns data into **clear, prioritized actions for revenue teams**
 
----
+## Problem 
+
+CRMs generate churn scores and even dashboards but:
+- No clear who do we act on today?
+- No prioritization tied to actual revenue impact
+- Insights sit in dashboards and no action taken
+
+- **My project fills this gap of turning data into clear, prioritized and repeatable actions**. 
+
+My project bridges this gap by:
+
+- Combining models into a single decision metric (revenue at risk)
+- Produces a ranked list of customers to act on now
+- Suggests concrete actions
+- Delivers it automatically and repeatedly
+
+The system goes beyond traditional CRM analytics to translate customer data into a prioritized list of actions, therefore addressing the common gap between CRM insights and execution.
+
+## Impact (Evaluation)
+
+On historical data:
+
+- Targeting the top 20% of customers identified by the system captures ~52% of total revenue loss
+This outperforms:
+        - Using customer value alone (43%)
+        - Using churn prediction alone (14%)
+
+- This means businesses can save more revenue with the same effort by focusing on the right customers.
+
+![Cumulative capture curve](artifacts/assets/evaluation.png)
+
+**Insights**
+
+- The combined revenue-at-risk model consistently outperforms bothe value-only and churn-only approaches, capturing the highest proportion of revenue loss across all customer segments.
+- Customer value provides the primary signal while churn probability improves prioritization by identifying which high-value customers are at immediate risk, leading to better targeting efficiency.
+
+
+
+**Baseline comparisons**
+
+- Churn-only captures 14% of total revenue 
+- Value-only captures 43% of total revenue 
+- Combined approach captures 52% of revenue 
+
+- The +9 percentage lift on total loss, which is ~21% relative improvement over CLV-only implies that when teams can only contact to 5-20% of customers, more revenue is saved with the same budget.
+
+- While value explains most of the signal, churn adds critical timing information that improves targeting efficiency.
+
+- Results reflect the characteristics of the dataset where customer value is a stronger predictor than churn. The system is designed to incorporate richer behavioral signals, and performance is expected to improve in environments with more informative churn patterns.
+
 
 ## Live Demo
 
-Watch the system in action:
+Watch the system below:
 
 [▶️ Demo Video](https://www.loom.com/share/b88a7162a7d149e6946e60b30c0bf962)
 
-The demo showcases:
-- Revenue risk dashboard
-- Customer-level insights
-- AI-powered decision recommendations
 
----
+## Limitations
 
-## Key Capabilities
+- Results depend on data quality and available signals
+- In this dataset, customer value was a stronger driver and churn adds incremental improvement. In other settings with stronger churn signals, the uplift could be larger.
+- Performance is expected to improve with richer behavioral data
+- CLV is approximated using predicted purchase frequency and historical AOV, which introduces bias in absolute values. However, since the business objective is prioritization rather than exact forecasting, I evaluated the system based on its ability to rank customers by revenue-at-risk.
 
-### 1. Customer Prioritization Engine
 
-Combines multiple models into a single decision layer:
-
-- **Churn Risk** → likelihood of customer leaving  
-- **CLV (Customer Lifetime Value)** → future revenue potential  
-- **Segmentation** → behavioral context  
-- **Revenue at Risk (RaR)** → prioritization metric  
-
-- Enables **value-based actioning**, not just scoring
-
-
-### 2. Centralized Intelligence Layer
-
-- All customer features and model outputs stored in **PostgreSQL**
-- Single source of truth for analytics and decision-making
-- Designed for **repeatable monthly scoring pipelines**
-
-
-### 3. AI-Powered Decision Interface
-
-A LangChain-based LLM agent sits on top of the database and acts as a **strategic assistant**.
-
-Instead of querying tables manually, users can ask:
-
-- *“Which customers should I contact to save the most revenue?”*
-
-And receive:
-
-- prioritized customer list  
-- revenue impact  
-- behavioral context  
-- recommended actions  
-
----
-
-## Example Interaction
-
-**Question:**
-> Which 5 customers should I contact to save most revenue?
-
-**Answer:**
-
-```plaintext
-🤖 Agent:
-**Customer ID: 12678.0**
-- **Churn Risk:** 44.8%
-- **Predicted CLV (12m):** £185,193.69
-- **Revenue at Risk:** £82,973.51
-- **Segment:** At Risk
-- **Behavioral Context:** Last purchase was 28 days ago with a monthly purchase rate of 0.8.
-- **Recommended Action:** Immediate re-engagement discount or "we miss you" personalized email.
-
-**Customer ID: 14062.0**
-- **Churn Risk:** 47.2%
-- **Predicted CLV (12m):** £161,930.68
-- **Revenue at Risk:** £76,364.24
-- **Segment:** At Risk
-- **Behavioral Context:** Last purchase was 34 days ago with a monthly purchase rate of 0.72.
-- **Recommended Action:** Immediate re-engagement discount or "we miss you" personalized email.
-
-**Customer ID: 13680.0**
-- **Churn Risk:** 51.6%
-- **Predicted CLV (12m):** £129,844.68
-- **Revenue at Risk:** £67,055.26
-- **Segment:** At Risk
-- **Behavioral Context:** Last purchase was 36 days ago with a monthly purchase rate of 0.81.
-- **Recommended Action:** Immediate re-engagement discount or "we miss you" personalized email.
-...
-```
-
-This poject moves from data analysis → decision support
-
----
-
-## Model Performance
-
-### Churn Prediction Model
-
-The churn model was evaluated on 2,675 customers with the following performance:
-
-- **ROC AUC**: 0.793
-- **PR AUC**: 0.808
-- **Brier Score**: 0.1865
-
-**Business-Oriented Evaluation**
-
-Instead of focusing only on metrics, the model was evaluated for **decision usefulness**:
-
-- **Top 10% customers**
-   - Precision: **88.8%**
-   - Lift: **1.58×**
-   - Captures **16% of all churners**
-
-- **Top 20% customers**
-   - Precision: **85.0%**
-   - Lift: **1.51×**
-   - Captures **30% of all churners**
-
-- **Top 5% customers**
-   - Precision: **93.2%**
-   - Lift: **1.65×**
-
-**Interpretation**
-
-The model is not only predictive but actionable:
-
-- High precision in top segments ensures **efficient targeting**
-- Lift demonstrates **strong prioritization capability**
-- Enables focusing on a small subset of customers with **disproportionate impact**
-
----
-
-## System Architecture
-```plaintext
-Raw Transaction Data
-        ↓
-Feature Engineering Pipeline (Reusable)
-        ↓
-ML Models
-  - Churn Prediction
-  - CLV Estimation
-  - K-Means Segmentation
-        ↓
-PostgreSQL (Customer 360 Table)
-        ↓
-LLM Agent (Natural Language Interface)
-        ↓
-Actionable Business Insights
-```
----
-
-## Application Layer
-
-The system is exposed through:
-
-### FastAPI Backend
-- Scoring endpoint for monthly model updates
-- Query endpoints for customer insights
-- Agent endpoint for natural language interaction
-
-![Combined scores successfully written to PostgreSQL database](artifacts/assets/scores-in-db.png)
-
-
-### Streamlit UI
-- Revenue-at-risk dashboard
-- Customer explorer
-- AI-powered decision interface
-
-This transforms the system from a modeling pipeline into a **usable business application**
-
----
-
-## ⚙️ Configurable LLM Layer
-
-The system is model-agnostic and supports multiple providers for flexibility, cost control, and future-proofing.
-
-**Supported Options**
-
-- **Local Models** (Ollama / LLaMA) → privacy + zero cost
-- **OpenAI (GPT-4o)** → high performance
-- **Anthropic (Claude)** → alternative cloud provider
-
-Switch models via .env — no code changes required.
-
-```bash
-LLM_PROVIDER=local
-LLM_MODEL=llama3.1
-
-# or
-
-LLM_PROVIDER=openai
-LLM_MODEL=gpt-4o
-OPENAI_API_KEY=sk-...
-```
----
-
-## Features
-
-- Customer prioritization based on revenue impact
-- Revenue-at-risk estimation (Churn × CLV)
-- Natural language querying of customer data
-- Automated action recommendations
-- Modular ML pipeline with reusable features
-- Centralized data storage for scalability
-
----
-
-## Why This Matters
-
-This system does not stop at **dashboards and model outputs**, it goes further and:
-
-✅ identifies who to act on
-
-✅ quantifies business impact
-
-✅ suggests what to do next
-
-As a result, bridging the gap between data science and decision-making.
-
----
-
-## Tech Stack
-
-- **Python** (Pandas, Scikit-learn, Lifetimes)
-- **FastAPI** (serving ML pipeline and agent endpoints)
-- **PostgreSQL** (customer feature & scoring store)
-- **Streamlit** (interactive decision dashboard)
-- **LangChain** (LLM agent orchestration and tool-based querying over structured data)
-- **LLM Providers** (OpenAI, Anthropic, Ollama)
-- **Docker** (containerization-ready architecture)
-
----
-
-## ⚠️ Model Limitations & Design Choices
-
-### CLV Modeling Assumptions
-
-Customer Lifetime Value (CLV) is estimated using the Gamma-Gamma and BG/NBD models from the Lifetimes library.
-
-The Gamma-Gamma model assumes: 
-- monetary value is independent of purchase frequency  
-- customers exhibit relatively stable purchasing behavior 
-
-### Observed Data Behavior
-
-In this dataset, customer behavior violates these assumptions:
-
-- Some customers purchase **frequently but spend very little per transaction**  
-- Others purchase **rarely but with very high transaction values**  
-
-This creates inconsistency between frequency and monetary value that does not satisfy the model assumptions.
-
-
-### Impact on Predictions
-
-As a result:
-- Some CLV estimates become **unrealistic or negative**
-- The model struggles to generalize across different customer types  
-
-
-### Design Decision
-
-Instead of forcing model assumptions or overfitting:
-
-- The model was retained as part of a broader decision system  
-- High-value customers are still effectively ranked  
-- Revenue-at-risk prioritization remains useful for business decisions  
-
-The focus is on **decision quality, not perfect individual predictions**
-
----
-
-## System Flexibility
-
-The architecture is modular:
-
-- Feature pipeline is shared across models  
-- Models can be swapped independently  
-
-Examples:
-- Replace Gamma-Gamma with ML-based regression or survival models  
-- Replace Random Forest with XGBoost or LightGBM  
-
-This enables continuous improvement without redesigning the system
-
----
-
-## Future Improvements
-
-- Pricing and revenue optimization module
-- A/B testing framework for retention strategies
-- Real-time scoring pipeline
-- API layer for integration with CRM tools
-
----
-## Quick Usage
-
-```python
-# step 1. create a virtual environment
-python -m venv env
-source env/bin/activate
-
-# step 2. install dependencies
-pip install requirements.txt
-
-# step 3. run training and scoring:
-python scripts/full_pipeline.py
-python scripts/score_combined.py or  python -m scripts.score_combined --score_date 2010-10-31 # use new score date for next month
-#result:
-combined_customer_scores.csv
-
-# step 4. write results to postgres. Ensure credentials are in db/config.py
-python -m scripts.store_scores \
-    --scores_path outputs/combined_customer_scores.csv \
-    --features_path outputs/customer_features.csv \
-    --as_of_date 2011-10-31 # change as_of_date for next month
-
-# step 5. ask the agent any question
-python -m scripts.ask_agent --question "Which 5 customers should I contact to save most revenue?"
-
-# evaluate churn scores
-python models/churn/evaluate_scores.py --output_csv outputs/churn_evaluation.csv
-This generates ROC AUC, PR AUC, confusion matrix metrics, and top-k lift analysis.
-```
